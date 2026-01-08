@@ -1,0 +1,33 @@
+name: Build Octopus Browser
+
+on:
+  workflow_dispatch:   # دستی اجرا می‌شود
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.3
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.2.0
+
+    - name: Restore packages
+      run: nuget restore OctopusBrowser.csproj -PackagesDirectory packages
+
+    - name: Build Release
+      run: msbuild OctopusBrowser.csproj /p:Configuration=Release /p:Platform="Any CPU"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: OctopusBrowser-Portable
+        path: |
+          bin\Release\*.exe
+          bin\Release\*.dll
+          bin\Release\*.config
